@@ -31,12 +31,17 @@ const command = new Command()
     { default: Number(Deno.env.get("HOOKSMITH_PORT") ?? "8080") },
   )
   .action(async (options) => {
-    if (!Number.isInteger(options.port) || options.port < 1 || options.port > 65535) {
+    if (
+      !Number.isInteger(options.port) || options.port < 1 ||
+      options.port > 65535
+    ) {
       throw new Error("port must be an integer between 1 and 65535.");
     }
 
     const controller = new AbortController();
-    const application = await createServerApplication({ configPath: options.config });
+    const application = await createServerApplication({
+      configPath: options.config,
+    });
 
     const shutdown = () => controller.abort();
     Deno.addSignalListener("SIGINT", shutdown);
