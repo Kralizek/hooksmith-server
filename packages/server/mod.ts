@@ -8,6 +8,7 @@ import { serveHttp } from "./http.ts";
 export * from "./application.ts";
 export * from "./config.ts";
 export * from "./http.ts";
+export * from "./problem.ts";
 
 export const VERSION = serverMetadata.version;
 
