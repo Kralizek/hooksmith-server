@@ -4,7 +4,8 @@
 *.jpg binary
 *.jpeg binary
 *.gif binary
+*.webp binary
 *.ico binary
 *.pdf binary
+*.tgz binary
 *.zip binary
-*.gz binary
