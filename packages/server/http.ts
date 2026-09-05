@@ -4,6 +4,7 @@ import {
   hydrateEvent,
   type Runtime,
 } from "@hooksmith/runtime";
+import { problemResponse } from "./problem.ts";
 
 /** HTTP listener options for the Hooksmith server. */
 export interface HttpServerOptions {
@@ -11,14 +12,6 @@ export interface HttpServerOptions {
   readonly port?: number;
   readonly signal?: AbortSignal;
   readonly logger?: Logger;
-}
-
-/** RFC 9457 Problem Details response body. */
-export interface Problem {
-  readonly type: string;
-  readonly title: string;
-  readonly status: number;
-  readonly detail?: string;
 }
 
 /** Creates the HTTP request handler used by the Hooksmith server. */
@@ -102,28 +95,6 @@ function formatListenAddress(hostname: string, port: number): string {
 
 function methodNotAllowed(allow: string): Response {
   return problemResponse(405, "Method Not Allowed", undefined, { allow });
-}
-
-function problemResponse(
-  status: number,
-  title: string,
-  detail?: string,
-  headers: HeadersInit = {},
-): Response {
-  const problem: Problem = {
-    type: "about:blank",
-    title,
-    status,
-    ...(detail === undefined ? {} : { detail }),
-  };
-
-  return new Response(JSON.stringify(problem), {
-    status,
-    headers: {
-      "content-type": "application/problem+json",
-      ...headers,
-    },
-  });
 }
 
 function jsonResponse(value: unknown, status = 200): Response {
