@@ -13,6 +13,14 @@ export interface HttpServerOptions {
   readonly logger?: Logger;
 }
 
+/** RFC 9457 Problem Details response body. */
+export interface Problem {
+  readonly type: string;
+  readonly title: string;
+  readonly status: number;
+  readonly detail?: string;
+}
+
 /** Creates the HTTP request handler used by the Hooksmith server. */
 export function createRequestHandler(
   runtime: Pick<Runtime, "process">,
@@ -31,7 +39,7 @@ export function createRequestHandler(
       return await processEvent(runtime, request, logger);
     }
 
-    return new Response(null, { status: 404 });
+    return problemResponse(404, "Not Found");
   };
 }
 
@@ -67,7 +75,7 @@ async function processEvent(
   try {
     document = await request.json();
   } catch (error) {
-    return errorResponse(400, errorMessage(error));
+    return problemResponse(400, "Bad Request", errorMessage(error));
   }
 
   let event: Event;
@@ -75,7 +83,7 @@ async function processEvent(
     assertEventDocument(document);
     event = hydrateEvent(document);
   } catch (error) {
-    return errorResponse(400, errorMessage(error));
+    return problemResponse(400, "Bad Request", errorMessage(error));
   }
 
   try {
@@ -83,7 +91,7 @@ async function processEvent(
     return jsonResponse(report);
   } catch (error) {
     logger?.error("Failed to process event.", undefined, error);
-    return errorResponse(500, "Internal server error.");
+    return problemResponse(500, "Internal Server Error");
   }
 }
 
@@ -93,14 +101,29 @@ function formatListenAddress(hostname: string, port: number): string {
 }
 
 function methodNotAllowed(allow: string): Response {
-  return new Response(null, {
-    status: 405,
-    headers: { allow },
-  });
+  return problemResponse(405, "Method Not Allowed", undefined, { allow });
 }
 
-function errorResponse(status: number, message: string): Response {
-  return jsonResponse({ error: message }, status);
+function problemResponse(
+  status: number,
+  title: string,
+  detail?: string,
+  headers: HeadersInit = {},
+): Response {
+  const problem: Problem = {
+    type: "about:blank",
+    title,
+    status,
+    ...(detail === undefined ? {} : { detail }),
+  };
+
+  return new Response(JSON.stringify(problem), {
+    status,
+    headers: {
+      "content-type": "application/problem+json",
+      ...headers,
+    },
+  });
 }
 
 function jsonResponse(value: unknown, status = 200): Response {
