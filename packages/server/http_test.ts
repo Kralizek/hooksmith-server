@@ -19,33 +19,39 @@ Deno.test("health endpoint returns ok", async () => {
 
 Deno.test("health endpoint rejects unsupported methods", async () => {
   const handler = createRequestHandler(createTestRuntime());
-  const response = await handler(new Request("http://localhost/health", { method: "POST" }));
+  const response = await handler(
+    new Request("http://localhost/health", { method: "POST" }),
+  );
   assertEquals(response.status, 405);
   assertEquals(response.headers.get("allow"), "GET");
 });
 
 Deno.test("events endpoint rejects invalid event documents", async () => {
   const handler = createRequestHandler(createTestRuntime());
-  const response = await handler(new Request("http://localhost/events", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ type: "test" }),
-  }));
+  const response = await handler(
+    new Request("http://localhost/events", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ type: "test" }),
+    }),
+  );
   assertEquals(response.status, 400);
 });
 
 Deno.test("events endpoint processes valid events", async () => {
   const handler = createRequestHandler(createTestRuntime());
-  const response = await handler(new Request("http://localhost/events", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      type: "test",
-      timestamp: "2026-09-05T00:00:00Z",
-      source: { kind: "test" },
-      data: {},
+  const response = await handler(
+    new Request("http://localhost/events", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        type: "test",
+        timestamp: "2026-09-05T00:00:00Z",
+        source: { kind: "test" },
+        data: {},
+      }),
     }),
-  }));
+  );
   assertEquals(response.status, 200);
   const report = await response.json();
   assertEquals(report.success, true);
@@ -56,16 +62,18 @@ Deno.test("unsuccessful execution reports still return 200", async () => {
     process: () => Promise.resolve({ success: false }),
   } as unknown as Pick<Runtime, "process">;
   const handler = createRequestHandler(runtime);
-  const response = await handler(new Request("http://localhost/events", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      type: "test",
-      timestamp: "2026-09-05T00:00:00Z",
-      source: { kind: "test" },
-      data: {},
+  const response = await handler(
+    new Request("http://localhost/events", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        type: "test",
+        timestamp: "2026-09-05T00:00:00Z",
+        source: { kind: "test" },
+        data: {},
+      }),
     }),
-  }));
+  );
   assertEquals(response.status, 200);
 });
 
@@ -74,16 +82,18 @@ Deno.test("events endpoint maps runtime errors to 500", async () => {
     process: () => Promise.reject(new Error("boom")),
   } as unknown as Pick<Runtime, "process">;
   const handler = createRequestHandler(runtime);
-  const response = await handler(new Request("http://localhost/events", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      type: "test",
-      timestamp: "2026-09-05T00:00:00Z",
-      source: { kind: "test" },
-      data: {},
+  const response = await handler(
+    new Request("http://localhost/events", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        type: "test",
+        timestamp: "2026-09-05T00:00:00Z",
+        source: { kind: "test" },
+        data: {},
+      }),
     }),
-  }));
+  );
   assertEquals(response.status, 500);
   assertEquals(await response.json(), { error: "boom" });
 });
