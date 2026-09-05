@@ -1,0 +1,10 @@
+{
+  "workspace": ["packages/*"],
+  "tasks": {
+    "fmt": "deno fmt --check",
+    "lint": "deno lint",
+    "check": "deno task fmt && deno task lint && deno check packages/**/*.ts && deno task docs",
+    "test": "deno test -A",
+    "docs": "deno run --allow-read scripts/check_export_docs.ts"
+  }
+}
