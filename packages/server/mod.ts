@@ -11,7 +11,7 @@ export * from "./http.ts";
 
 export const VERSION = serverMetadata.version;
 
-function createCommand(): Command {
+function createCommand() {
   return new Command()
     .name("hooksmith-server")
     .version(VERSION)
