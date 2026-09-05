@@ -59,6 +59,7 @@ function createCommand() {
           logger: application.logger,
         });
       } finally {
+        application.dispose();
         Deno.removeSignalListener("SIGINT", shutdown);
         if (Deno.build.os !== "windows") {
           Deno.removeSignalListener("SIGTERM", shutdown);

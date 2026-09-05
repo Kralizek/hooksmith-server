@@ -4,7 +4,9 @@ import {
   hydrateEvent,
   type Runtime,
 } from "@hooksmith/runtime";
+import { trace } from "@opentelemetry/api";
 import { problemResponse } from "./problem.ts";
+import { annotateHttpRoute } from "./telemetry.ts";
 
 /** HTTP listener options for the Hooksmith server. */
 export interface HttpServerOptions {
@@ -23,11 +25,13 @@ export function createRequestHandler(
     const path = new URL(request.url).pathname;
 
     if (path === "/health") {
+      annotateHttpRoute(trace.getActiveSpan(), request.method, "/health");
       if (request.method !== "GET") return methodNotAllowed("GET");
       return jsonResponse({ status: "ok" });
     }
 
     if (path === "/events") {
+      annotateHttpRoute(trace.getActiveSpan(), request.method, "/events");
       if (request.method !== "POST") return methodNotAllowed("POST");
       return await processEvent(runtime, request, logger);
     }

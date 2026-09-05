@@ -28,3 +28,21 @@ and `HOOKSMITH_PORT`; explicit command-line options take precedence.
 A completed Hooksmith execution returns HTTP 200 even when the report has
 `success: false`. HTTP 5xx responses are reserved for request-processing
 exceptions.
+
+## OpenTelemetry
+
+The server bridges Hooksmith telemetry to Deno's built-in OpenTelemetry
+integration. Enable it with the standard Deno and OpenTelemetry environment
+variables:
+
+```sh
+OTEL_DENO=true \
+OTEL_SERVICE_NAME=hooksmith-server \
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318 \
+deno task server
+```
+
+Deno provides the incoming HTTP server span and distributed trace propagation;
+Hooksmith runtime spans execute beneath that active request context. Standard
+`OTEL_*` variables configure exporters, resource attributes, sampling, and
+propagators.
