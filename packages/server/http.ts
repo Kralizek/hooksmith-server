@@ -16,6 +16,7 @@ export interface HttpServerOptions {
 /** Creates the HTTP request handler used by the Hooksmith server. */
 export function createRequestHandler(
   runtime: Pick<Runtime, "process">,
+  logger?: Logger,
 ): (request: Request) => Promise<Response> {
   return async (request) => {
     const path = new URL(request.url).pathname;
@@ -27,7 +28,7 @@ export function createRequestHandler(
 
     if (path === "/events") {
       if (request.method !== "POST") return methodNotAllowed("POST");
-      return await processEvent(runtime, request);
+      return await processEvent(runtime, request, logger);
     }
 
     return new Response(null, { status: 404 });
@@ -50,7 +51,7 @@ export async function serveHttp(
         });
       },
     },
-    createRequestHandler(runtime),
+    createRequestHandler(runtime, options.logger),
   );
 
   await server.finished;
@@ -59,6 +60,7 @@ export async function serveHttp(
 async function processEvent(
   runtime: Pick<Runtime, "process">,
   request: Request,
+  logger?: Logger,
 ): Promise<Response> {
   let document: unknown;
 
@@ -80,7 +82,8 @@ async function processEvent(
     const report = await runtime.process(event);
     return jsonResponse(report);
   } catch (error) {
-    return errorResponse(500, errorMessage(error));
+    logger?.error("Failed to process event.", error);
+    return errorResponse(500, "Internal server error.");
   }
 }
 
