@@ -12,7 +12,8 @@
   "tasks": {
     "check": "deno fmt --check && deno lint && deno task check:docs && deno test -A && deno check packages/*/mod.ts",
     "check:docs": "deno run --allow-read=packages,extensions scripts/check_export_docs.ts",
-    "test": "deno test -A"
+    "test": "deno test -A",
+    "server": "deno run -A packages/server/main.ts"
   },
   "fmt": {
     "exclude": [
