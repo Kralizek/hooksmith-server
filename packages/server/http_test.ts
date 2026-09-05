@@ -25,7 +25,10 @@ Deno.test("health endpoint rejects unsupported methods with a problem", async ()
 
   assertEquals(response.status, 405);
   assertEquals(response.headers.get("allow"), "GET");
-  assertEquals(response.headers.get("content-type"), "application/problem+json");
+  assertEquals(
+    response.headers.get("content-type"),
+    "application/problem+json",
+  );
   assertEquals(await response.json(), {
     type: "about:blank",
     title: "Method Not Allowed",
@@ -44,7 +47,10 @@ Deno.test("events endpoint rejects invalid event documents with a problem", asyn
   );
 
   assertEquals(response.status, 400);
-  assertEquals(response.headers.get("content-type"), "application/problem+json");
+  assertEquals(
+    response.headers.get("content-type"),
+    "application/problem+json",
+  );
   const problem = await response.json();
   assertEquals(problem.type, "about:blank");
   assertEquals(problem.title, "Bad Request");
@@ -110,7 +116,10 @@ Deno.test("events endpoint maps runtime errors to generic problems", async () =>
   );
 
   assertEquals(response.status, 500);
-  assertEquals(response.headers.get("content-type"), "application/problem+json");
+  assertEquals(
+    response.headers.get("content-type"),
+    "application/problem+json",
+  );
   assertEquals(await response.json(), {
     type: "about:blank",
     title: "Internal Server Error",
@@ -123,7 +132,10 @@ Deno.test("unknown routes return a not-found problem", async () => {
   const response = await handler(new Request("http://localhost/unknown"));
 
   assertEquals(response.status, 404);
-  assertEquals(response.headers.get("content-type"), "application/problem+json");
+  assertEquals(
+    response.headers.get("content-type"),
+    "application/problem+json",
+  );
   assertEquals(await response.json(), {
     type: "about:blank",
     title: "Not Found",
