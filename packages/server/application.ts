@@ -1,4 +1,5 @@
 import type { Logger, LoggerFactory } from "@hooksmith/core";
+import { enableOpenTelemetry } from "@hooksmith/opentelemetry";
 import {
   createConsoleLogWriter,
   createLoggerFactory,
@@ -19,19 +20,32 @@ export interface ServerApplication {
   readonly configPath: string;
   readonly logger: Logger;
   readonly runtime: Runtime;
+  dispose(): void;
 }
 
 /** Loads configuration and creates the Hooksmith runtime used by the server. */
 export async function createServerApplication(
   options: ServerApplicationOptions = {},
 ): Promise<ServerApplication> {
-  const configPath = resolve(options.configPath ?? "hooksmith.config.ts");
-  const config = await loadConfig(configPath);
-  const loggerFactory = options.loggerFactory ?? createLoggerFactory({
-    write: createConsoleLogWriter(),
-  });
-  const logger = loggerFactory.getLogger("Server");
-  const runtime = createRuntime(config, { logger: loggerFactory });
+  const restoreTelemetry = enableOpenTelemetry();
 
-  return { configPath, logger, runtime };
+  try {
+    const configPath = resolve(options.configPath ?? "hooksmith.config.ts");
+    const config = await loadConfig(configPath);
+    const loggerFactory = options.loggerFactory ?? createLoggerFactory({
+      write: createConsoleLogWriter(),
+    });
+    const logger = loggerFactory.getLogger("Server");
+    const runtime = createRuntime(config, { logger: loggerFactory });
+
+    return {
+      configPath,
+      logger,
+      runtime,
+      dispose: restoreTelemetry,
+    };
+  } catch (error) {
+    restoreTelemetry();
+    throw error;
+  }
 }

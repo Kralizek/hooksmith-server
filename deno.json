@@ -4,8 +4,10 @@
   ],
   "imports": {
     "@hooksmith/core": "jsr:@hooksmith/core@^0.10.0",
+    "@hooksmith/opentelemetry": "jsr:@hooksmith/opentelemetry@^0.10.0",
     "@hooksmith/runtime": "jsr:@hooksmith/runtime@^0.10.0",
     "@cliffy/command": "jsr:@cliffy/command@^1.2.1",
+    "@opentelemetry/api": "npm:@opentelemetry/api@^1.9.0",
     "@std/assert": "jsr:@std/assert@^1",
     "@std/path": "jsr:@std/path@^1"
   },
@@ -24,6 +26,7 @@
     "age": "P1D",
     "exclude": [
       "jsr:@hooksmith/core",
+      "jsr:@hooksmith/opentelemetry",
       "jsr:@hooksmith/runtime"
     ]
   },

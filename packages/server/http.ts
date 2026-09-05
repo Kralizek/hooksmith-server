@@ -4,6 +4,7 @@ import {
   hydrateEvent,
   type Runtime,
 } from "@hooksmith/runtime";
+import { trace } from "@opentelemetry/api";
 import { problemResponse } from "./problem.ts";
 
 /** HTTP listener options for the Hooksmith server. */
@@ -23,11 +24,13 @@ export function createRequestHandler(
     const path = new URL(request.url).pathname;
 
     if (path === "/health") {
+      annotateHttpRoute(request.method, "/health");
       if (request.method !== "GET") return methodNotAllowed("GET");
       return jsonResponse({ status: "ok" });
     }
 
     if (path === "/events") {
+      annotateHttpRoute(request.method, "/events");
       if (request.method !== "POST") return methodNotAllowed("POST");
       return await processEvent(runtime, request, logger);
     }
@@ -86,6 +89,12 @@ async function processEvent(
     logger?.error("Failed to process event.", undefined, error);
     return problemResponse(500, "Internal Server Error");
   }
+}
+
+function annotateHttpRoute(method: string, route: string): void {
+  const span = trace.getActiveSpan();
+  span?.setAttribute("http.route", route);
+  span?.updateName(`${method} ${route}`);
 }
 
 function formatListenAddress(hostname: string, port: number): string {
