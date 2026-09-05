@@ -19,12 +19,11 @@ export function problemResponse(
     status,
     ...(detail === undefined ? {} : { detail }),
   };
+  const responseHeaders = new Headers(headers);
+  responseHeaders.set("content-type", "application/problem+json");
 
   return new Response(JSON.stringify(problem), {
     status,
-    headers: {
-      "content-type": "application/problem+json",
-      ...headers,
-    },
+    headers: responseHeaders,
   });
 }
