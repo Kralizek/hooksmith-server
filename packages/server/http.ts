@@ -82,7 +82,7 @@ async function processEvent(
     const report = await runtime.process(event);
     return jsonResponse(report);
   } catch (error) {
-    logger?.error("Failed to process event.", error);
+    logger?.error("Failed to process event.", undefined, error);
     return errorResponse(500, "Internal server error.");
   }
 }
