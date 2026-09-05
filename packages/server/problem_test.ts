@@ -5,7 +5,10 @@ Deno.test("problemResponse returns RFC 9457 media type and body", async () => {
   const response = problemResponse(400, "Bad Request", "Invalid input.");
 
   assertEquals(response.status, 400);
-  assertEquals(response.headers.get("content-type"), "application/problem+json");
+  assertEquals(
+    response.headers.get("content-type"),
+    "application/problem+json",
+  );
   assertEquals(await response.json(), {
     type: "about:blank",
     title: "Bad Request",
