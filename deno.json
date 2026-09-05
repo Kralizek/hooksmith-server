@@ -1,10 +1,24 @@
 {
-  "workspace": ["packages/*"],
+  "workspace": [
+    "./packages/server"
+  ],
+  "imports": {
+    "@hooksmith/core": "jsr:@hooksmith/core@^0.9.0",
+    "@hooksmith/opentelemetry": "jsr:@hooksmith/opentelemetry@^0.9.0",
+    "@hooksmith/runtime": "jsr:@hooksmith/runtime@^0.9.0",
+    "@std/assert": "jsr:@std/assert@^1",
+    "@std/path": "jsr:@std/path@^1"
+  },
+  "minimumDependencyAge": 0,
   "tasks": {
-    "fmt": "deno fmt --check",
-    "lint": "deno lint",
-    "check": "deno task fmt && deno task lint && deno check packages/**/*.ts && deno task docs",
-    "test": "deno test -A",
-    "docs": "deno run --allow-read scripts/check_export_docs.ts"
-  }
+    "check": "deno fmt --check && deno lint && deno task check:docs && deno test -A && deno check packages/*/mod.ts",
+    "check:docs": "deno run --allow-read=packages,extensions scripts/check_export_docs.ts",
+    "test": "deno test -A"
+  },
+  "fmt": {
+    "exclude": [
+      "README.md"
+    ]
+  },
+  "lock": false
 }
