@@ -77,7 +77,7 @@ Deno.test("unsuccessful execution reports still return 200", async () => {
   assertEquals(response.status, 200);
 });
 
-Deno.test("events endpoint maps runtime errors to 500", async () => {
+Deno.test("events endpoint maps runtime errors to generic 500 responses", async () => {
   const runtime = {
     process: () => Promise.reject(new Error("boom")),
   } as unknown as Pick<Runtime, "process">;
@@ -95,7 +95,7 @@ Deno.test("events endpoint maps runtime errors to 500", async () => {
     }),
   );
   assertEquals(response.status, 500);
-  assertEquals(await response.json(), { error: "boom" });
+  assertEquals(await response.json(), { error: "Internal server error." });
 });
 
 Deno.test("unknown routes return 404", async () => {
