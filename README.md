@@ -62,7 +62,7 @@ HOOKSMITH_ACCEPT_REMOTE_SOURCES=true
 
 With remote sources enabled, Deno's default trusted import hosts are allowed. To use another HTTPS host, such as a custom S3 endpoint, set `HOOKSMITH_IMPORT_HOSTS` to a comma-separated list of additional hosts. The image preserves Deno's default trusted hosts and appends this list.
 
-Remote source imports remain disabled by default, even when a remote config URL is supplied.
+Remote source imports remain disabled by default, even when a remote config URL is supplied. Values other than the literal `true` do not enable them.
 
 ## OpenTelemetry
 
