@@ -25,9 +25,12 @@ ENV DENO_DIR=/deno-dir \
 WORKDIR /app
 
 COPY --from=cache /deno-dir /deno-dir
+COPY docker/entrypoint.sh /usr/local/bin/hooksmith-server-entrypoint
+
+RUN chmod +x /usr/local/bin/hooksmith-server-entrypoint
 
 VOLUME ["/app/config"]
 
 EXPOSE 8080
 
-ENTRYPOINT ["sh", "-c", "IMPORT_PERMISSION=; if [ \"${HOOKSMITH_ACCEPT_REMOTE_SOURCES}\" = \"true\" ]; then if [ -n \"${HOOKSMITH_IMPORT_HOSTS:-}\" ]; then IMPORT_PERMISSION=\"--allow-import=deno.land,jsr.io,esm.sh,raw.esm.sh,cdn.jsdelivr.net,raw.githubusercontent.com,gist.githubusercontent.com,${HOOKSMITH_IMPORT_HOSTS}\"; else IMPORT_PERMISSION=\"--allow-import\"; fi; fi; exec deno run --allow-read --allow-env --allow-net ${IMPORT_PERMISSION} \"jsr:@hooksmith/server@${HOOKSMITH_VERSION}\" --config \"${HOOKSMITH_CONFIG}\" \"$@\"", "--"]
+ENTRYPOINT ["/usr/local/bin/hooksmith-server-entrypoint"]
