@@ -128,6 +128,32 @@ Deno.test("events endpoint rejects invalid mapped event documents", async () => 
   assertEquals(response.status, 400);
 });
 
+Deno.test("events endpoint hides ingress mapper error details", async () => {
+  const handler = createRequestHandler(
+    createTestRuntime(),
+    undefined,
+    () => {
+      throw new Error("sensitive implementation detail");
+    },
+  );
+
+  const response = await handler(
+    new Request("http://localhost/events", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ message: "hello" }),
+    }),
+  );
+
+  assertEquals(response.status, 400);
+  assertEquals(await response.json(), {
+    type: "about:blank",
+    title: "Bad Request",
+    status: 400,
+    detail: "Ingress mapping failed.",
+  });
+});
+
 Deno.test("unsuccessful execution reports still return 200", async () => {
   const runtime = {
     process: () => Promise.resolve({ success: false }),
