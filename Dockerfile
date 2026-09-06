@@ -4,7 +4,8 @@ ARG HOOKSMITH_VERSION
 
 ENV DENO_DIR=/deno-dir
 
-RUN deno cache "jsr:@hooksmith/server@${HOOKSMITH_VERSION}"
+RUN test -n "${HOOKSMITH_VERSION}" || (echo "HOOKSMITH_VERSION build arg is required." >&2; exit 1); \
+    deno cache "jsr:@hooksmith/server@${HOOKSMITH_VERSION}"
 
 
 FROM denoland/deno:2.9.6-alpine@sha256:aa665f8777136863b5b8a0445a5cdfccff8103b5f40c9a877de5276b04facb1e
@@ -25,4 +26,4 @@ VOLUME ["/app/config"]
 
 EXPOSE 8080
 
-ENTRYPOINT ["sh", "-c", "exec deno run --allow-read --allow-env --allow-net jsr:@hooksmith/server@${HOOKSMITH_VERSION} --config \"${HOOKSMITH_CONFIG}\" \"$@\"", "--"]
+ENTRYPOINT ["sh", "-c", "exec deno run --allow-read --allow-env --allow-net \"jsr:@hooksmith/server@${HOOKSMITH_VERSION}\" --config \"${HOOKSMITH_CONFIG}\" \"$@\"", "--"]
