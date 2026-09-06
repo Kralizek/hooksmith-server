@@ -25,6 +25,18 @@ Deno.test("module locations resolve local paths to file URLs", () => {
   assertEquals(location.endsWith("/hooksmith.config.ts"), true);
 });
 
+Deno.test("module locations treat Windows drive paths as local paths", () => {
+  for (
+    const location of [
+      "C:/tmp/config.ts",
+      "C:\\tmp\\config.ts",
+    ]
+  ) {
+    const resolved = resolveModuleLocation(location);
+    assertEquals(resolved.startsWith("file://"), true);
+  }
+});
+
 Deno.test("module locations reject non-HTTPS remote protocols", () => {
   for (
     const location of [
