@@ -14,16 +14,47 @@ deno task server -- --config hooksmith.config.ts --host 127.0.0.1 --port 8080
 Options:
 
 - `-c, --config` — config module path, defaults to `hooksmith.config.ts`
+- `--host-config` — optional host config module path
 - `--host` — bind hostname, defaults to `127.0.0.1`
 - `--port` — listener port, defaults to `8080`
 
-The same defaults can be supplied through `HOOKSMITH_CONFIG`, `HOOKSMITH_HOST`,
-and `HOOKSMITH_PORT`; explicit command-line options take precedence.
+The same defaults can be supplied through `HOOKSMITH_CONFIG`,
+`HOOKSMITH_HOST_CONFIG`, `HOOKSMITH_HOST`, and `HOOKSMITH_PORT`; explicit
+command-line options take precedence.
 
 ## Endpoints
 
 - `GET /health` — process health
 - `POST /events` — process one Hooksmith event and return its execution report
+
+By default, the JSON request body sent to `POST /events` must already be a valid
+Hooksmith event document.
+
+An optional host config can provide an ingress mapper that adapts an arbitrary
+JSON webhook payload before Hooksmith event validation and runtime processing:
+
+```ts
+import type { HostConfig } from "@hooksmith/server";
+
+export default {
+  ingress: {
+    map: ({ body, request }) => ({
+      type: "github.push",
+      timestamp: new Date().toISOString(),
+      source: {
+        kind: "github",
+        id: request.headers.get("x-github-delivery") ?? undefined,
+      },
+      data: body,
+    }),
+  },
+} satisfies HostConfig;
+```
+
+The mapper receives the parsed JSON body plus the original `Request`, so webhook
+packages can remain structurally compatible with the server without depending
+on a shared ingress-contract package. If the host config is present but
+`ingress.map` is absent, the default event-document behavior is unchanged.
 
 A completed Hooksmith execution returns HTTP 200 even when the report has
 `success: false`. HTTP 5xx responses are reserved for request-processing
