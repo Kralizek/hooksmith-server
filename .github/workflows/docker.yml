@@ -33,10 +33,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          if ! tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq .tag_name 2>/dev/null)"; then
-            echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "No published release exists yet; skipping container build."
-            exit 0
+          error_file="$(mktemp)"
+          if ! tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq .tag_name 2>"$error_file")"; then
+            if grep -q "HTTP 404" "$error_file"; then
+              echo "available=false" >> "$GITHUB_OUTPUT"
+              echo "No published release exists yet; skipping container build."
+              exit 0
+            fi
+            cat "$error_file" >&2
+            exit 1
           fi
           if [[ ! "$tag" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
             echo "Latest release tag $tag is not a stable semantic version." >&2
