@@ -54,15 +54,11 @@ See [`packages/server`](packages/server) for the full HTTP contract and runtime 
 
 ## Container configuration
 
-The published container keeps the local default `/app/config/hooksmith.config.ts`. To use remote configuration, set `HOOKSMITH_CONFIG` and optionally `HOOKSMITH_HOST_CONFIG` to HTTPS URLs, then explicitly enable remote source imports:
+The published container keeps the local default `/app/config/hooksmith.config.ts`. To use remote configuration, set `HOOKSMITH_CONFIG` and optionally `HOOKSMITH_HOST_CONFIG` to HTTPS URLs and opt in with `HOOKSMITH_ACCEPT_REMOTE_SOURCES=true`.
 
-```text
-HOOKSMITH_ACCEPT_REMOTE_SOURCES=true
-```
+When remote sources are accepted, the image enables Deno's default trusted import hosts. To use another HTTPS host, such as a custom S3 endpoint, set `HOOKSMITH_IMPORT_HOSTS` to the additional comma-separated import hosts required by the deployment.
 
-With remote sources enabled, Deno's default trusted import hosts are allowed. To use another HTTPS host, such as a custom S3 endpoint, set `HOOKSMITH_IMPORT_HOSTS` to a comma-separated list of additional hosts. The image preserves Deno's default trusted hosts and appends this list.
-
-Remote source imports remain disabled by default, even when a remote config URL is supplied. Values other than the literal `true` do not enable them.
+`HOOKSMITH_IMPORT_HOSTS` is only valid when `HOOKSMITH_ACCEPT_REMOTE_SOURCES=true`; the container fails at startup if an import-host list is supplied without explicitly accepting remote sources.
 
 ## OpenTelemetry
 
