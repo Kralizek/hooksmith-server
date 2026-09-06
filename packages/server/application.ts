@@ -6,13 +6,13 @@ import {
   createRuntime,
   type Runtime,
 } from "@hooksmith/runtime";
-import { resolve } from "@std/path";
 import { loadConfig } from "./config.ts";
 import {
   type HostConfig,
   type IngressMapper,
   loadHostConfig,
 } from "./host_config.ts";
+import { resolveModuleLocation } from "./location.ts";
 
 /** Options used to create the Hooksmith server application. */
 export interface ServerApplicationOptions {
@@ -39,12 +39,12 @@ export async function createServerApplication(
   const restoreTelemetry = enableOpenTelemetry();
 
   try {
-    const configLocation = resolve(
+    const configLocation = resolveModuleLocation(
       options.configLocation ?? "hooksmith.config.ts",
     );
     const config = await loadConfig(configLocation);
     const hostConfigLocation = options.hostConfigLocation
-      ? resolve(options.hostConfigLocation)
+      ? resolveModuleLocation(options.hostConfigLocation)
       : undefined;
     const hostConfig = hostConfigLocation
       ? await loadHostConfig(hostConfigLocation)
