@@ -83,7 +83,8 @@ async function processEvent(
     try {
       document = await ingressMapper({ body: document, request });
     } catch (error) {
-      return problemResponse(400, "Bad Request", errorMessage(error));
+      logger?.error("Failed to map ingress request.", undefined, error);
+      return problemResponse(400, "Bad Request", "Ingress mapping failed.");
     }
   }
 
