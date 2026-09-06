@@ -39,6 +39,11 @@ deno run \
 Deno has a small default set of trusted import hosts. Other HTTPS hosts require
 an explicit `--allow-import=<host>` permission. HTTP URLs are not supported.
 
+When using the published container, remote imports are disabled by default. Set
+`HOOKSMITH_ACCEPT_REMOTE_SOURCES=true` to enable Deno's default trusted import
+hosts. `HOOKSMITH_IMPORT_HOSTS` can add a comma-separated list of additional
+hosts for deployments such as custom S3 endpoints.
+
 ## Endpoints
 
 - `GET /health` — process health
