@@ -41,7 +41,10 @@ export async function loadHostConfig(location: string): Promise<HostConfig> {
   return module.default;
 }
 
-function assertHostConfig(value: unknown, location: string): asserts value is HostConfig {
+function assertHostConfig(
+  value: unknown,
+  location: string,
+): asserts value is HostConfig {
   if (!isRecord(value)) {
     throw new Error(
       `Hooksmith host config module ${location} must export an object.`,
