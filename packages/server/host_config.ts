@@ -41,7 +41,7 @@ export function assertHostConfig(value: unknown): asserts value is HostConfig {
   }
 }
 
-/** Loads a Hooksmith server host configuration module from a local path or HTTPS location. */
+/** Loads a Hooksmith server host configuration module from a local path, file URL, or HTTPS location. */
 export async function loadHostConfig(location: string): Promise<HostConfig> {
   let module: Record<string, unknown>;
 
