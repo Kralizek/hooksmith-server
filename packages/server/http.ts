@@ -5,6 +5,7 @@ import {
   type Runtime,
 } from "@hooksmith/runtime";
 import { trace } from "@opentelemetry/api";
+import type { IngressMapper } from "./host_config.ts";
 import { problemResponse } from "./problem.ts";
 import { annotateHttpRoute } from "./telemetry.ts";
 
@@ -14,12 +15,14 @@ export interface HttpServerOptions {
   readonly port?: number;
   readonly signal?: AbortSignal;
   readonly logger?: Logger;
+  readonly ingressMapper?: IngressMapper;
 }
 
 /** Creates the HTTP request handler used by the Hooksmith server. */
 export function createRequestHandler(
   runtime: Pick<Runtime, "process">,
   logger?: Logger,
+  ingressMapper?: IngressMapper,
 ): (request: Request) => Promise<Response> {
   return async (request) => {
     const path = new URL(request.url).pathname;
@@ -33,7 +36,7 @@ export function createRequestHandler(
     if (path === "/events") {
       annotateHttpRoute(trace.getActiveSpan(), request.method, "/events");
       if (request.method !== "POST") return methodNotAllowed("POST");
-      return await processEvent(runtime, request, logger);
+      return await processEvent(runtime, request, logger, ingressMapper);
     }
 
     return problemResponse(404, "Not Found");
@@ -56,7 +59,7 @@ export async function serveHttp(
         });
       },
     },
-    createRequestHandler(runtime, options.logger),
+    createRequestHandler(runtime, options.logger, options.ingressMapper),
   );
 
   await server.finished;
@@ -66,6 +69,7 @@ async function processEvent(
   runtime: Pick<Runtime, "process">,
   request: Request,
   logger?: Logger,
+  ingressMapper?: IngressMapper,
 ): Promise<Response> {
   let document: unknown;
 
@@ -73,6 +77,15 @@ async function processEvent(
     document = await request.json();
   } catch (error) {
     return problemResponse(400, "Bad Request", errorMessage(error));
+  }
+
+  if (ingressMapper) {
+    try {
+      document = await ingressMapper({ body: document, request });
+    } catch (error) {
+      logger?.error("Failed to map ingress request.", undefined, error);
+      return problemResponse(400, "Bad Request", "Ingress mapping failed.");
+    }
   }
 
   let event: Event;

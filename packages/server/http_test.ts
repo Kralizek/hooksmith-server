@@ -1,3 +1,4 @@
+import type { EventDocument } from "@hooksmith/core";
 import {
   createRuntime,
   nullLoggerFactory,
@@ -75,6 +76,82 @@ Deno.test("events endpoint processes valid events", async () => {
   assertEquals(response.status, 200);
   const report = await response.json();
   assertEquals(report.success, true);
+});
+
+Deno.test("events endpoint maps ingress before event validation", async () => {
+  const handler = createRequestHandler(
+    createTestRuntime(),
+    undefined,
+    ({ body, request }) => ({
+      type: "webhook.test",
+      timestamp: "2026-09-05T00:00:00Z",
+      source: {
+        kind: "webhook",
+        id: request.headers.get("x-delivery-id") ?? undefined,
+      },
+      data: body,
+    }),
+  );
+
+  const response = await handler(
+    new Request("http://localhost/events", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-delivery-id": "delivery-123",
+      },
+      body: JSON.stringify({ message: "hello" }),
+    }),
+  );
+
+  assertEquals(response.status, 200);
+  const report = await response.json();
+  assertEquals(report.success, true);
+});
+
+Deno.test("events endpoint rejects invalid mapped event documents", async () => {
+  const invalidDocument = { type: "test" } as EventDocument;
+  const handler = createRequestHandler(
+    createTestRuntime(),
+    undefined,
+    () => invalidDocument,
+  );
+
+  const response = await handler(
+    new Request("http://localhost/events", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ message: "hello" }),
+    }),
+  );
+
+  assertEquals(response.status, 400);
+});
+
+Deno.test("events endpoint hides ingress mapper error details", async () => {
+  const handler = createRequestHandler(
+    createTestRuntime(),
+    undefined,
+    () => {
+      throw new Error("sensitive implementation detail");
+    },
+  );
+
+  const response = await handler(
+    new Request("http://localhost/events", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ message: "hello" }),
+    }),
+  );
+
+  assertEquals(response.status, 400);
+  assertEquals(await response.json(), {
+    type: "about:blank",
+    title: "Bad Request",
+    status: 400,
+    detail: "Ingress mapping failed.",
+  });
 });
 
 Deno.test("unsuccessful execution reports still return 200", async () => {

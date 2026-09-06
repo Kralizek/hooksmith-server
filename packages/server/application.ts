@@ -8,16 +8,25 @@ import {
 } from "@hooksmith/runtime";
 import { resolve } from "@std/path";
 import { loadConfig } from "./config.ts";
+import {
+  type HostConfig,
+  type IngressMapper,
+  loadHostConfig,
+} from "./host_config.ts";
 
 /** Options used to create the Hooksmith server application. */
 export interface ServerApplicationOptions {
-  readonly configPath?: string;
+  readonly configLocation?: string;
+  readonly hostConfigLocation?: string;
   readonly loggerFactory?: LoggerFactory;
 }
 
 /** Initialized Hooksmith server application state. */
 export interface ServerApplication {
-  readonly configPath: string;
+  readonly configLocation: string;
+  readonly hostConfigLocation?: string;
+  readonly hostConfig?: HostConfig;
+  readonly ingressMapper?: IngressMapper;
   readonly logger: Logger;
   readonly runtime: Runtime;
   dispose(): void;
@@ -30,8 +39,16 @@ export async function createServerApplication(
   const restoreTelemetry = enableOpenTelemetry();
 
   try {
-    const configPath = resolve(options.configPath ?? "hooksmith.config.ts");
-    const config = await loadConfig(configPath);
+    const configLocation = resolve(
+      options.configLocation ?? "hooksmith.config.ts",
+    );
+    const config = await loadConfig(configLocation);
+    const hostConfigLocation = options.hostConfigLocation
+      ? resolve(options.hostConfigLocation)
+      : undefined;
+    const hostConfig = hostConfigLocation
+      ? await loadHostConfig(hostConfigLocation)
+      : undefined;
     const loggerFactory = options.loggerFactory ?? createLoggerFactory({
       write: createConsoleLogWriter(),
     });
@@ -39,7 +56,10 @@ export async function createServerApplication(
     const runtime = createRuntime(config, { logger: loggerFactory });
 
     return {
-      configPath,
+      configLocation,
+      hostConfigLocation,
+      hostConfig,
+      ingressMapper: hostConfig?.ingress?.map,
       logger,
       runtime,
       dispose: restoreTelemetry,

@@ -7,6 +7,7 @@ import { serveHttp } from "./http.ts";
 
 export * from "./application.ts";
 export * from "./config.ts";
+export * from "./host_config.ts";
 export * from "./http.ts";
 export * from "./problem.ts";
 
@@ -18,9 +19,14 @@ function createCommand() {
     .version(VERSION)
     .description("Run Hooksmith as a long-lived HTTP server.")
     .option(
-      "-c, --config <path:string>",
-      "Config file.",
+      "-c, --config <location:string>",
+      "Config module location.",
       { default: Deno.env.get("HOOKSMITH_CONFIG") ?? "hooksmith.config.ts" },
+    )
+    .option(
+      "--host-config <location:string>",
+      "Optional host config module location.",
+      { default: Deno.env.get("HOOKSMITH_HOST_CONFIG") },
     )
     .option(
       "--host <hostname:string>",
@@ -42,7 +48,8 @@ function createCommand() {
 
       const controller = new AbortController();
       const application = await createServerApplication({
-        configPath: options.config,
+        configLocation: options.config,
+        hostConfigLocation: options.hostConfig,
       });
 
       const shutdown = () => controller.abort();
@@ -57,6 +64,7 @@ function createCommand() {
           port: options.port,
           signal: controller.signal,
           logger: application.logger,
+          ingressMapper: application.ingressMapper,
         });
       } finally {
         application.dispose();
