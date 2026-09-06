@@ -26,10 +26,12 @@ Deno.test("module locations resolve local paths to file URLs", () => {
 });
 
 Deno.test("module locations reject non-HTTPS remote protocols", () => {
-  for (const location of [
-    "http://example.com/config.ts",
-    "http:example.com/config.ts",
-  ]) {
+  for (
+    const location of [
+      "http://example.com/config.ts",
+      "http:example.com/config.ts",
+    ]
+  ) {
     assertThrows(
       () => resolveModuleLocation(location),
       Error,
