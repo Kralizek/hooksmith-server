@@ -26,3 +26,16 @@ jobs:
 
       - name: Validate packages
         run: deno publish --dry-run
+
+      - name: Resolve package version
+        id: version
+        shell: bash
+        run: echo "version=$(jq -r .version packages/server/deno.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Build container image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          build-args: |
+            HOOKSMITH_VERSION=${{ steps.version.outputs.version }}
