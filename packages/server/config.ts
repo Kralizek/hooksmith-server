@@ -1,7 +1,7 @@
 import type { Config } from "@hooksmith/core";
 import { resolveModuleLocation } from "./location.ts";
 
-/** Loads a Hooksmith configuration module from a local path or HTTPS location. */
+/** Loads a Hooksmith configuration module from a local path, file URL, or HTTPS location. */
 export async function loadConfig(location: string): Promise<Config> {
   let module: Record<string, unknown>;
 
