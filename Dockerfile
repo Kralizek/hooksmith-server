@@ -29,4 +29,4 @@ VOLUME ["/app/config"]
 
 EXPOSE 8080
 
-ENTRYPOINT ["sh", "-c", "exec deno run --allow-read --allow-env --allow-net \"jsr:@hooksmith/server@${HOOKSMITH_VERSION}\" --config \"${HOOKSMITH_CONFIG}\" \"$@\"", "--"]
+ENTRYPOINT ["sh", "-c", "if [ -n \"${HOOKSMITH_IMPORT_HOSTS:-}\" ]; then IMPORT_PERMISSION=\"--allow-import=${HOOKSMITH_IMPORT_HOSTS}\"; else IMPORT_PERMISSION=\"--allow-import\"; fi; exec deno run --allow-read --allow-env --allow-net ${IMPORT_PERMISSION} \"jsr:@hooksmith/server@${HOOKSMITH_VERSION}\" --config \"${HOOKSMITH_CONFIG}\" \"$@\"", "--"]
