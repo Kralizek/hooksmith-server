@@ -215,9 +215,9 @@ jobs:
         with:
           images: ghcr.io/kralizek/hooksmith-server
           tags: |
-            type=semver,pattern={{version}},value=${{ needs.create-release.outputs.tag }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ needs.create-release.outputs.tag }}
-            type=semver,pattern={{major}},value=${{ needs.create-release.outputs.tag }}
+            type=semver,pattern={{version}},value=${{ needs.create-release.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.create-release.outputs.version }}
+            type=semver,pattern={{major}},value=${{ needs.create-release.outputs.version }}
             type=raw,value=latest
 
       - name: Build and publish container image
