@@ -7,12 +7,14 @@ on:
     paths:
       - Dockerfile
       - .dockerignore
+      - docker/**
       - .github/workflows/docker.yml
       - .github/workflows/release.yml
   pull_request:
     paths:
       - Dockerfile
       - .dockerignore
+      - docker/**
       - .github/workflows/docker.yml
       - .github/workflows/release.yml
 
