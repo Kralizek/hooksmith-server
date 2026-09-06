@@ -23,8 +23,10 @@ The same defaults can be supplied through `HOOKSMITH_CONFIG`,
 command-line options take precedence.
 
 Configuration locations can be local paths, `file:` URLs, or HTTPS URLs. Remote
-configuration is loaded as executable TypeScript through Deno's module system,
-so the corresponding import host must be allowed by Deno:
+configuration is loaded as executable TypeScript through Deno's module system.
+The server supports HTTPS locations, but it does not grant remote-import
+permission by default when run directly. The process that launches the server
+must explicitly allow the required host:
 
 ```sh
 deno run \
@@ -36,13 +38,18 @@ deno run \
   --config https://raw.githubusercontent.com/example/project/main/hooksmith.config.ts
 ```
 
-Deno has a small default set of trusted import hosts. Other HTTPS hosts require
-an explicit `--allow-import=<host>` permission. HTTP URLs are not supported.
+This keeps capability and permission separate: Hooksmith Server understands
+remote config locations, while Deno decides which remote hosts may execute code.
+Using `--allow-import` without a host enables Deno's default trusted import
+hosts; `--allow-import=<host>` allows an explicit host. HTTP URLs are not
+supported.
 
-When using the published container, remote imports are disabled by default. Set
+When using the published container, the entrypoint maps deployment settings to
+the same Deno permission model. Remote imports are disabled by default. Set
 `HOOKSMITH_ACCEPT_REMOTE_SOURCES=true` to enable Deno's default trusted import
 hosts. `HOOKSMITH_IMPORT_HOSTS` can add a comma-separated list of additional
-hosts for deployments such as custom S3 endpoints.
+hosts for deployments such as custom S3 endpoints, and is rejected unless
+remote sources are explicitly enabled.
 
 ## Endpoints
 
