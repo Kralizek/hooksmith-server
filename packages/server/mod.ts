@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run --allow-read --allow-env --allow-net --allow-import
+#!/usr/bin/env -S deno run --allow-read --allow-env --allow-net
 
 import { Command } from "@cliffy/command";
 import serverMetadata from "./deno.json" with { type: "json" };
