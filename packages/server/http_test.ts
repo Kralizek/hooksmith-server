@@ -83,7 +83,7 @@ Deno.test("events endpoint maps ingress before event validation", async () => {
     undefined,
     ({ body, request }) => ({
       type: "webhook.test",
-      timestamp: "2026-09-05T00:00:00Z",
+      timestamp: Temporal.Instant.from("2026-09-05T00:00:00Z"),
       source: {
         kind: "webhook",
         id: request.headers.get("x-delivery-id") ?? undefined,
