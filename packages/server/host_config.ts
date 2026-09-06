@@ -37,5 +37,38 @@ export async function loadHostConfig(location: string): Promise<HostConfig> {
     );
   }
 
-  return module.default as HostConfig;
+  assertHostConfig(module.default, location);
+  return module.default;
+}
+
+function assertHostConfig(value: unknown, location: string): asserts value is HostConfig {
+  if (!isRecord(value)) {
+    throw new Error(
+      `Hooksmith host config module ${location} must export an object.`,
+    );
+  }
+
+  if (value.ingress === undefined || value.ingress === null) {
+    return;
+  }
+
+  if (!isRecord(value.ingress)) {
+    throw new Error(
+      `Hooksmith host config module ${location} ingress must be an object.`,
+    );
+  }
+
+  if (
+    value.ingress.map !== undefined &&
+    value.ingress.map !== null &&
+    typeof value.ingress.map !== "function"
+  ) {
+    throw new Error(
+      `Hooksmith host config module ${location} ingress.map must be a function.`,
+    );
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
