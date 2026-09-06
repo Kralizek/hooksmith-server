@@ -1,3 +1,4 @@
+import type { EventDocument } from "@hooksmith/core";
 import {
   createRuntime,
   nullLoggerFactory,
@@ -109,10 +110,11 @@ Deno.test("events endpoint maps ingress before event validation", async () => {
 });
 
 Deno.test("events endpoint rejects invalid mapped event documents", async () => {
+  const invalidDocument = { type: "test" } as EventDocument;
   const handler = createRequestHandler(
     createTestRuntime(),
     undefined,
-    () => ({ type: "test" }) as never,
+    () => invalidDocument,
   );
 
   const response = await handler(
