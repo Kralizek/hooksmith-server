@@ -52,8 +52,8 @@ export default {
 ```
 
 The mapper receives the parsed JSON body plus the original `Request`, so webhook
-packages can remain structurally compatible with the server without depending
-on a shared ingress-contract package. If the host config is present but
+packages can remain structurally compatible with the server without depending on
+a shared ingress-contract package. If the host config is present but
 `ingress.map` is absent, the default event-document behavior is unchanged.
 
 A completed Hooksmith execution returns HTTP 200 even when the report has
