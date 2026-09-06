@@ -1,4 +1,4 @@
-import type { Event } from "@hooksmith/core";
+import type { EventDocument } from "@hooksmith/core";
 import { toFileUrl } from "@std/path";
 
 /** HTTP request data available to an ingress mapper. */
@@ -10,7 +10,7 @@ export interface IngressContext {
 /** Maps an HTTP request payload to a Hooksmith event document. */
 export type IngressMapper = (
   context: IngressContext,
-) => Event | Promise<Event>;
+) => EventDocument | Promise<EventDocument>;
 
 /** Optional HTTP ingress configuration for the Hooksmith server host. */
 export interface HostConfig {
