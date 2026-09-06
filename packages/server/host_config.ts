@@ -19,13 +19,13 @@ export interface HostConfig {
   };
 }
 
-/** Validates a Hooksmith server host configuration value. */
+/** Asserts that a value is a valid Hooksmith server host configuration. */
 export function assertHostConfig(value: unknown): asserts value is HostConfig {
   if (!isRecord(value)) {
     throw new Error("Host config must be an object.");
   }
 
-  if (value.ingress === undefined || value.ingress === null) {
+  if (value.ingress === undefined) {
     return;
   }
 
@@ -35,7 +35,6 @@ export function assertHostConfig(value: unknown): asserts value is HostConfig {
 
   if (
     value.ingress.map !== undefined &&
-    value.ingress.map !== null &&
     typeof value.ingress.map !== "function"
   ) {
     throw new Error("Host config ingress.map must be a function.");
@@ -60,7 +59,14 @@ export async function loadHostConfig(location: string): Promise<HostConfig> {
     );
   }
 
-  assertHostConfig(module.default);
+  try {
+    assertHostConfig(module.default);
+  } catch (error) {
+    throw new Error(`Invalid Hooksmith host config from ${location}.`, {
+      cause: error,
+    });
+  }
+
   return module.default;
 }
 
