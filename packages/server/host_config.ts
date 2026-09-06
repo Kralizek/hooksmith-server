@@ -19,6 +19,29 @@ export interface HostConfig {
   };
 }
 
+/** Validates a Hooksmith server host configuration value. */
+export function assertHostConfig(value: unknown): asserts value is HostConfig {
+  if (!isRecord(value)) {
+    throw new Error("Host config must be an object.");
+  }
+
+  if (value.ingress === undefined || value.ingress === null) {
+    return;
+  }
+
+  if (!isRecord(value.ingress)) {
+    throw new Error("Host config ingress must be an object.");
+  }
+
+  if (
+    value.ingress.map !== undefined &&
+    value.ingress.map !== null &&
+    typeof value.ingress.map !== "function"
+  ) {
+    throw new Error("Host config ingress.map must be a function.");
+  }
+}
+
 /** Loads a Hooksmith server host configuration module from an absolute file location. */
 export async function loadHostConfig(location: string): Promise<HostConfig> {
   let module: Record<string, unknown>;
@@ -37,39 +60,8 @@ export async function loadHostConfig(location: string): Promise<HostConfig> {
     );
   }
 
-  assertHostConfig(module.default, location);
+  assertHostConfig(module.default);
   return module.default;
-}
-
-function assertHostConfig(
-  value: unknown,
-  location: string,
-): asserts value is HostConfig {
-  if (!isRecord(value)) {
-    throw new Error(
-      `Hooksmith host config module ${location} must export an object.`,
-    );
-  }
-
-  if (value.ingress === undefined || value.ingress === null) {
-    return;
-  }
-
-  if (!isRecord(value.ingress)) {
-    throw new Error(
-      `Hooksmith host config module ${location} ingress must be an object.`,
-    );
-  }
-
-  if (
-    value.ingress.map !== undefined &&
-    value.ingress.map !== null &&
-    typeof value.ingress.map !== "function"
-  ) {
-    throw new Error(
-      `Hooksmith host config module ${location} ingress.map must be a function.`,
-    );
-  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
