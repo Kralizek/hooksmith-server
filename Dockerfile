@@ -4,7 +4,10 @@ ARG HOOKSMITH_VERSION
 
 ENV DENO_DIR=/deno-dir
 
-RUN test -n "${HOOKSMITH_VERSION}" || (echo "HOOKSMITH_VERSION build arg is required." >&2; exit 1); \
+RUN if [ -z "${HOOKSMITH_VERSION}" ]; then \
+      echo "HOOKSMITH_VERSION build arg is required." >&2; \
+      exit 1; \
+    fi; \
     deno cache "jsr:@hooksmith/server@${HOOKSMITH_VERSION}"
 
 
