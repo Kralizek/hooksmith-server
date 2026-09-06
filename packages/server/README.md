@@ -46,10 +46,11 @@ supported.
 
 When using the published container, the entrypoint maps deployment settings to
 the same Deno permission model. Remote imports are disabled by default. Set
-`HOOKSMITH_ACCEPT_REMOTE_SOURCES=true` to enable Deno's default trusted import
-hosts. `HOOKSMITH_IMPORT_HOSTS` can add a comma-separated list of additional
-hosts for deployments such as custom S3 endpoints, and is rejected unless remote
-sources are explicitly enabled.
+`HOOKSMITH_ACCEPT_REMOTE_SOURCES=true` to enable remote imports. With
+`HOOKSMITH_IMPORT_HOSTS` unset, Deno's current default trusted import hosts are
+used. If `HOOKSMITH_IMPORT_HOSTS` is set, its comma-separated value replaces
+that default allow list with the exact hosts required by the deployment. The
+variable is rejected unless remote sources are explicitly enabled.
 
 ## Endpoints
 
