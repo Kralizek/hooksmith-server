@@ -223,7 +223,7 @@ jobs:
       - name: Build and publish container image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./docker
           push: true
           build-args: |
             HOOKSMITH_VERSION=${{ needs.create-release.outputs.version }}

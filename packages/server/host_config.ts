@@ -1,5 +1,5 @@
 import type { EventDocument } from "@hooksmith/core";
-import { toFileUrl } from "@std/path";
+import { resolveModuleLocation } from "./location.ts";
 
 /** HTTP request data available to an ingress mapper. */
 export interface IngressContext {
@@ -41,12 +41,12 @@ export function assertHostConfig(value: unknown): asserts value is HostConfig {
   }
 }
 
-/** Loads a Hooksmith server host configuration module from an absolute file location. */
+/** Loads a Hooksmith server host configuration module from a local path, file URL, or HTTPS location. */
 export async function loadHostConfig(location: string): Promise<HostConfig> {
   let module: Record<string, unknown>;
 
   try {
-    module = await import(toFileUrl(location).href);
+    module = await import(resolveModuleLocation(location));
   } catch (error) {
     throw new Error(`Failed to load Hooksmith host config from ${location}.`, {
       cause: error,

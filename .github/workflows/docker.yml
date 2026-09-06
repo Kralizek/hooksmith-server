@@ -5,14 +5,12 @@ on:
     branches:
       - master
     paths:
-      - Dockerfile
-      - .dockerignore
+      - docker/**
       - .github/workflows/docker.yml
       - .github/workflows/release.yml
   pull_request:
     paths:
-      - Dockerfile
-      - .dockerignore
+      - docker/**
       - .github/workflows/docker.yml
       - .github/workflows/release.yml
 
@@ -54,7 +52,7 @@ jobs:
         if: steps.release.outputs.available == 'true'
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./docker
           push: false
           build-args: |
             HOOKSMITH_VERSION=${{ steps.release.outputs.version }}

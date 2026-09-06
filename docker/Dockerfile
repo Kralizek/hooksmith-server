@@ -18,15 +18,18 @@ ARG HOOKSMITH_VERSION
 ENV DENO_DIR=/deno-dir \
     HOOKSMITH_VERSION=${HOOKSMITH_VERSION} \
     HOOKSMITH_CONFIG=/app/config/hooksmith.config.ts \
+    HOOKSMITH_ACCEPT_REMOTE_SOURCES=false \
     HOOKSMITH_HOST=0.0.0.0 \
     HOOKSMITH_PORT=8080
 
 WORKDIR /app
 
 COPY --from=cache /deno-dir /deno-dir
+COPY entrypoint.sh /usr/local/bin/hooksmith-server-entrypoint
+RUN chmod +x /usr/local/bin/hooksmith-server-entrypoint
 
 VOLUME ["/app/config"]
 
 EXPOSE 8080
 
-ENTRYPOINT ["sh", "-c", "exec deno run --allow-read --allow-env --allow-net \"jsr:@hooksmith/server@${HOOKSMITH_VERSION}\" --config \"${HOOKSMITH_CONFIG}\" \"$@\"", "--"]
+ENTRYPOINT ["/usr/local/bin/hooksmith-server-entrypoint"]

@@ -13,14 +13,44 @@ deno task server -- --config hooksmith.config.ts --host 127.0.0.1 --port 8080
 
 Options:
 
-- `-c, --config` — config module path, defaults to `hooksmith.config.ts`
-- `--host-config` — optional host config module path
+- `-c, --config` — config module location, defaults to `hooksmith.config.ts`
+- `--host-config` — optional host config module location
 - `--host` — bind hostname, defaults to `127.0.0.1`
 - `--port` — listener port, defaults to `8080`
 
 The same defaults can be supplied through `HOOKSMITH_CONFIG`,
 `HOOKSMITH_HOST_CONFIG`, `HOOKSMITH_HOST`, and `HOOKSMITH_PORT`; explicit
 command-line options take precedence.
+
+Configuration locations can be local paths, `file:` URLs, or HTTPS URLs. Remote
+configuration is loaded as executable TypeScript through Deno's module system.
+The server supports HTTPS locations, but it does not grant remote-import
+permission by default when run directly. The process that launches the server
+must explicitly allow the required host:
+
+```sh
+deno run \
+  --allow-read \
+  --allow-env \
+  --allow-net \
+  --allow-import=raw.githubusercontent.com \
+  jsr:@hooksmith/server \
+  --config https://raw.githubusercontent.com/example/project/main/hooksmith.config.ts
+```
+
+This keeps capability and permission separate: Hooksmith Server understands
+remote config locations, while Deno decides which remote hosts may execute code.
+Using `--allow-import` without a host enables Deno's default trusted import
+hosts; `--allow-import=<host>` allows an explicit host. HTTP URLs are not
+supported.
+
+When using the published container, the entrypoint maps deployment settings to
+the same Deno permission model. Remote imports are disabled by default. Set
+`HOOKSMITH_ACCEPT_REMOTE_SOURCES=true` to enable remote imports. With
+`HOOKSMITH_IMPORT_HOSTS` unset, Deno's current default trusted import hosts are
+used. If `HOOKSMITH_IMPORT_HOSTS` is set, its comma-separated value replaces
+that default allow list with the exact hosts required by the deployment. The
+variable is rejected unless remote sources are explicitly enabled.
 
 ## Endpoints
 

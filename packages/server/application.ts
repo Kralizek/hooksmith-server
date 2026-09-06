@@ -6,7 +6,6 @@ import {
   createRuntime,
   type Runtime,
 } from "@hooksmith/runtime";
-import { resolve } from "@std/path";
 import { loadConfig } from "./config.ts";
 import {
   type HostConfig,
@@ -39,13 +38,9 @@ export async function createServerApplication(
   const restoreTelemetry = enableOpenTelemetry();
 
   try {
-    const configLocation = resolve(
-      options.configLocation ?? "hooksmith.config.ts",
-    );
+    const configLocation = options.configLocation ?? "hooksmith.config.ts";
     const config = await loadConfig(configLocation);
-    const hostConfigLocation = options.hostConfigLocation
-      ? resolve(options.hostConfigLocation)
-      : undefined;
+    const hostConfigLocation = options.hostConfigLocation;
     const hostConfig = hostConfigLocation
       ? await loadHostConfig(hostConfigLocation)
       : undefined;

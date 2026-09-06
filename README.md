@@ -33,12 +33,15 @@ deno task server -- --config hooksmith.config.ts --host 127.0.0.1 --port 8080
 Important options:
 
 ```text
--c, --config <path>   Config file (default: hooksmith.config.ts)
-    --host <hostname> HTTP bind hostname (default: 127.0.0.1)
-    --port <port>     HTTP bind port (default: 8080)
+-c, --config <location>      Config module location (default: hooksmith.config.ts)
+    --host-config <location> Optional host config module location
+    --host <hostname>        HTTP bind hostname (default: 127.0.0.1)
+    --port <port>            HTTP bind port (default: 8080)
 ```
 
-The same defaults can be provided through `HOOKSMITH_CONFIG`, `HOOKSMITH_HOST`, and `HOOKSMITH_PORT`; explicit command-line options take precedence.
+The same defaults can be provided through `HOOKSMITH_CONFIG`, `HOOKSMITH_HOST_CONFIG`, `HOOKSMITH_HOST`, and `HOOKSMITH_PORT`; explicit command-line options take precedence.
+
+Config locations can be local paths, `file:` URLs, or HTTPS URLs. Remote configs are loaded as Deno modules and therefore require the corresponding `--allow-import` permission for their host.
 
 The host exposes:
 
@@ -48,6 +51,14 @@ The host exposes:
 Completed Hooksmith executions return HTTP 200 even when the report has `success: false`. Faulty HTTP requests and server failures use RFC 9457 Problem Details with `application/problem+json`.
 
 See [`packages/server`](packages/server) for the full HTTP contract and runtime semantics.
+
+## Container configuration
+
+The published container keeps the local default `/app/config/hooksmith.config.ts`. To use remote configuration, set `HOOKSMITH_CONFIG` and optionally `HOOKSMITH_HOST_CONFIG` to HTTPS URLs and opt in with `HOOKSMITH_ACCEPT_REMOTE_SOURCES=true`.
+
+When remote sources are accepted and `HOOKSMITH_IMPORT_HOSTS` is unset, the image uses Deno's current default trusted import hosts. Set `HOOKSMITH_IMPORT_HOSTS` to a comma-separated list to replace that default allow list with the exact hosts required by the deployment, for example a custom S3 endpoint.
+
+`HOOKSMITH_IMPORT_HOSTS` is only valid when `HOOKSMITH_ACCEPT_REMOTE_SOURCES=true`; the container fails at startup if an import-host list is supplied without explicitly accepting remote sources.
 
 ## OpenTelemetry
 
