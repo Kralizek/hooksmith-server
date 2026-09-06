@@ -25,4 +25,4 @@ VOLUME ["/app/config"]
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "deno run --allow-read --allow-env --allow-net jsr:@hooksmith/server@${HOOKSMITH_VERSION}"]
+ENTRYPOINT ["sh", "-c", "exec deno run --allow-read --allow-env --allow-net jsr:@hooksmith/server@${HOOKSMITH_VERSION} --config \"${HOOKSMITH_CONFIG}\" \"$@\"", "--"]
