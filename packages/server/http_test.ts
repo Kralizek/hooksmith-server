@@ -77,6 +77,55 @@ Deno.test("events endpoint processes valid events", async () => {
   assertEquals(report.success, true);
 });
 
+Deno.test("events endpoint maps ingress before event validation", async () => {
+  const handler = createRequestHandler(
+    createTestRuntime(),
+    undefined,
+    ({ body, request }) => ({
+      type: "webhook.test",
+      timestamp: "2026-09-05T00:00:00Z",
+      source: {
+        kind: "webhook",
+        id: request.headers.get("x-delivery-id") ?? undefined,
+      },
+      data: body,
+    }),
+  );
+
+  const response = await handler(
+    new Request("http://localhost/events", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-delivery-id": "delivery-123",
+      },
+      body: JSON.stringify({ message: "hello" }),
+    }),
+  );
+
+  assertEquals(response.status, 200);
+  const report = await response.json();
+  assertEquals(report.success, true);
+});
+
+Deno.test("events endpoint rejects invalid mapped event documents", async () => {
+  const handler = createRequestHandler(
+    createTestRuntime(),
+    undefined,
+    () => ({ type: "test" }) as never,
+  );
+
+  const response = await handler(
+    new Request("http://localhost/events", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ message: "hello" }),
+    }),
+  );
+
+  assertEquals(response.status, 400);
+});
+
 Deno.test("unsuccessful execution reports still return 200", async () => {
   const runtime = {
     process: () => Promise.resolve({ success: false }),
