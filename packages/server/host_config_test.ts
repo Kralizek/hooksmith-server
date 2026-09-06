@@ -1,5 +1,21 @@
-import { assertRejects } from "@std/assert";
-import { loadHostConfig } from "./host_config.ts";
+import { assertRejects, assertThrows } from "@std/assert";
+import { assertHostConfig, loadHostConfig } from "./host_config.ts";
+
+Deno.test("assertHostConfig rejects non-object values", () => {
+  assertThrows(
+    () => assertHostConfig(42),
+    Error,
+    "Host config must be an object",
+  );
+});
+
+Deno.test("assertHostConfig rejects non-function ingress mappers", () => {
+  assertThrows(
+    () => assertHostConfig({ ingress: { map: 42 } }),
+    Error,
+    "Host config ingress.map must be a function",
+  );
+});
 
 Deno.test("host config rejects non-object default exports", async () => {
   const path = await writeHostConfig("export default 42;\n");
@@ -8,7 +24,7 @@ Deno.test("host config rejects non-object default exports", async () => {
     await assertRejects(
       () => loadHostConfig(path),
       Error,
-      "must export an object",
+      "Host config must be an object",
     );
   } finally {
     await Deno.remove(path);
@@ -24,7 +40,7 @@ Deno.test("host config rejects non-function ingress mappers", async () => {
     await assertRejects(
       () => loadHostConfig(path),
       Error,
-      "ingress.map must be a function",
+      "Host config ingress.map must be a function",
     );
   } finally {
     await Deno.remove(path);
