@@ -8,14 +8,32 @@ if [ -n "${HOOKSMITH_IMPORT_HOSTS:-}" ] && [ "${HOOKSMITH_ACCEPT_REMOTE_SOURCES:
   exit 1
 fi
 
-set -- deno run --allow-read --allow-env --allow-net "$@"
-
 if [ "${HOOKSMITH_ACCEPT_REMOTE_SOURCES:-false}" = "true" ]; then
   if [ -n "${HOOKSMITH_IMPORT_HOSTS:-}" ]; then
-    set -- "$@" "--allow-import=${DEFAULT_IMPORT_HOSTS},${HOOKSMITH_IMPORT_HOSTS}"
-  else
-    set -- "$@" --allow-import
+    exec deno run \
+      --allow-read \
+      --allow-env \
+      --allow-net \
+      "--allow-import=${DEFAULT_IMPORT_HOSTS},${HOOKSMITH_IMPORT_HOSTS}" \
+      "jsr:@hooksmith/server@${HOOKSMITH_VERSION}" \
+      --config "${HOOKSMITH_CONFIG}" \
+      "$@"
   fi
+
+  exec deno run \
+    --allow-read \
+    --allow-env \
+    --allow-net \
+    --allow-import \
+    "jsr:@hooksmith/server@${HOOKSMITH_VERSION}" \
+    --config "${HOOKSMITH_CONFIG}" \
+    "$@"
 fi
 
-exec "$@" "jsr:@hooksmith/server@${HOOKSMITH_VERSION}" --config "${HOOKSMITH_CONFIG}"
+exec deno run \
+  --allow-read \
+  --allow-env \
+  --allow-net \
+  "jsr:@hooksmith/server@${HOOKSMITH_VERSION}" \
+  --config "${HOOKSMITH_CONFIG}" \
+  "$@"
