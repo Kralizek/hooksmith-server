@@ -33,8 +33,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq .tag_name 2>/dev/null || true)"
-          if [[ -z "$tag" ]]; then
+          if ! tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq .tag_name 2>/dev/null)"; then
             echo "available=false" >> "$GITHUB_OUTPUT"
             echo "No published release exists yet; skipping container build."
             exit 0
