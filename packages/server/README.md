@@ -13,14 +13,31 @@ deno task server -- --config hooksmith.config.ts --host 127.0.0.1 --port 8080
 
 Options:
 
-- `-c, --config` — config module path, defaults to `hooksmith.config.ts`
-- `--host-config` — optional host config module path
+- `-c, --config` — config module location, defaults to `hooksmith.config.ts`
+- `--host-config` — optional host config module location
 - `--host` — bind hostname, defaults to `127.0.0.1`
 - `--port` — listener port, defaults to `8080`
 
 The same defaults can be supplied through `HOOKSMITH_CONFIG`,
 `HOOKSMITH_HOST_CONFIG`, `HOOKSMITH_HOST`, and `HOOKSMITH_PORT`; explicit
 command-line options take precedence.
+
+Configuration locations can be local paths, `file:` URLs, or HTTPS URLs. Remote
+configuration is loaded as executable TypeScript through Deno's module system,
+so the corresponding import host must be allowed by Deno:
+
+```sh
+deno run \
+  --allow-read \
+  --allow-env \
+  --allow-net \
+  --allow-import=raw.githubusercontent.com \
+  jsr:@hooksmith/server \
+  --config https://raw.githubusercontent.com/example/project/main/hooksmith.config.ts
+```
+
+Deno has a small default set of trusted import hosts. Other HTTPS hosts require
+an explicit `--allow-import=<host>` permission. HTTP URLs are not supported.
 
 ## Endpoints
 
