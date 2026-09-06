@@ -18,6 +18,7 @@ ARG HOOKSMITH_VERSION
 ENV DENO_DIR=/deno-dir \
     HOOKSMITH_VERSION=${HOOKSMITH_VERSION} \
     HOOKSMITH_CONFIG=/app/config/hooksmith.config.ts \
+    HOOKSMITH_ACCEPT_REMOTE_SOURCES=false \
     HOOKSMITH_HOST=0.0.0.0 \
     HOOKSMITH_PORT=8080
 
@@ -29,4 +30,4 @@ VOLUME ["/app/config"]
 
 EXPOSE 8080
 
-ENTRYPOINT ["sh", "-c", "IMPORT_PERMISSION=; if [ \"${HOOKSMITH_ACCEPT_REMOTE_SOURCES:-false}\" = \"true\" ]; then if [ -n \"${HOOKSMITH_IMPORT_HOSTS:-}\" ]; then IMPORT_PERMISSION=\"--allow-import=deno.land,jsr.io,esm.sh,raw.esm.sh,cdn.jsdelivr.net,raw.githubusercontent.com,gist.githubusercontent.com,${HOOKSMITH_IMPORT_HOSTS}\"; else IMPORT_PERMISSION=\"--allow-import\"; fi; fi; exec deno run --allow-read --allow-env --allow-net ${IMPORT_PERMISSION} \"jsr:@hooksmith/server@${HOOKSMITH_VERSION}\" --config \"${HOOKSMITH_CONFIG}\" \"$@\"", "--"]
+ENTRYPOINT ["sh", "-c", "IMPORT_PERMISSION=; if [ \"${HOOKSMITH_ACCEPT_REMOTE_SOURCES}\" = \"true\" ]; then if [ -n \"${HOOKSMITH_IMPORT_HOSTS:-}\" ]; then IMPORT_PERMISSION=\"--allow-import=deno.land,jsr.io,esm.sh,raw.esm.sh,cdn.jsdelivr.net,raw.githubusercontent.com,gist.githubusercontent.com,${HOOKSMITH_IMPORT_HOSTS}\"; else IMPORT_PERMISSION=\"--allow-import\"; fi; fi; exec deno run --allow-read --allow-env --allow-net ${IMPORT_PERMISSION} \"jsr:@hooksmith/server@${HOOKSMITH_VERSION}\" --config \"${HOOKSMITH_CONFIG}\" \"$@\"", "--"]
