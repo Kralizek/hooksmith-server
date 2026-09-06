@@ -56,7 +56,7 @@ See [`packages/server`](packages/server) for the full HTTP contract and runtime 
 
 The published container keeps the local default `/app/config/hooksmith.config.ts`. To use remote configuration, set `HOOKSMITH_CONFIG` and optionally `HOOKSMITH_HOST_CONFIG` to HTTPS URLs and opt in with `HOOKSMITH_ACCEPT_REMOTE_SOURCES=true`.
 
-When remote sources are accepted, the image enables Deno's default trusted import hosts. To use another HTTPS host, such as a custom S3 endpoint, set `HOOKSMITH_IMPORT_HOSTS` to the additional comma-separated import hosts required by the deployment.
+When remote sources are accepted and `HOOKSMITH_IMPORT_HOSTS` is unset, the image uses Deno's current default trusted import hosts. Set `HOOKSMITH_IMPORT_HOSTS` to a comma-separated list to replace that default allow list with the exact hosts required by the deployment, for example a custom S3 endpoint.
 
 `HOOKSMITH_IMPORT_HOSTS` is only valid when `HOOKSMITH_ACCEPT_REMOTE_SOURCES=true`; the container fails at startup if an import-host list is supplied without explicitly accepting remote sources.
 
