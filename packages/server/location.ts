@@ -1,20 +1,21 @@
 import { resolve, toFileUrl } from "@std/path";
 
-/** Resolves a local path or HTTPS URL into an importable module location. */
+/** Resolves a local path or supported URL into an importable module location. */
 export function resolveModuleLocation(location: string): string {
-  if (location.startsWith("https://")) {
-    return new URL(location).href;
+  let url: URL;
+  try {
+    url = new URL(location);
+  } catch {
+    return toFileUrl(resolve(location)).href;
   }
 
-  if (location.startsWith("file://")) {
-    return new URL(location).href;
+  switch (url.protocol) {
+    case "https:":
+    case "file:":
+      return url.href;
+    default:
+      throw new Error(
+        `Unsupported module location protocol in ${location}. Only local paths, file URLs, and HTTPS URLs are supported.`,
+      );
   }
-
-  if (location.includes("://")) {
-    throw new Error(
-      `Unsupported module location protocol in ${location}. Only local paths, file URLs, and HTTPS URLs are supported.`,
-    );
-  }
-
-  return toFileUrl(resolve(location)).href;
 }
