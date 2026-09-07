@@ -1,4 +1,5 @@
 import type { Logger, LoggerFactory } from "@hooksmith/core";
+import type { HttpIngressMapper } from "@hooksmith/core/ingress";
 import { enableOpenTelemetry } from "@hooksmith/opentelemetry";
 import {
   createConsoleLogWriter,
@@ -7,11 +8,7 @@ import {
   type Runtime,
 } from "@hooksmith/runtime";
 import { loadConfig } from "./config.ts";
-import {
-  type HostConfig,
-  type IngressMapper,
-  loadHostConfig,
-} from "./host_config.ts";
+import { type HostConfig, loadHostConfig } from "./host_config.ts";
 
 /** Options used to create the Hooksmith server application. */
 export interface ServerApplicationOptions {
@@ -25,7 +22,7 @@ export interface ServerApplication {
   readonly configLocation: string;
   readonly hostConfigLocation?: string;
   readonly hostConfig?: HostConfig;
-  readonly ingressMapper?: IngressMapper;
+  readonly ingressMapper?: HttpIngressMapper;
   readonly logger: Logger;
   readonly runtime: Runtime;
   dispose(): void;
