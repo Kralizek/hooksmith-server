@@ -61,30 +61,33 @@ By default, the JSON request body sent to `POST /events` must already be a valid
 Hooksmith event document.
 
 An optional host config can provide an ingress mapper that adapts an arbitrary
-JSON webhook payload before Hooksmith event validation and runtime processing:
+HTTP webhook request before Hooksmith event validation and runtime processing:
 
 ```ts
 import type { HostConfig } from "@hooksmith/server";
 
 export default {
   ingress: {
-    map: ({ body, request }) => ({
+    map: ({ request }) => ({
       type: "github.push",
       timestamp: new Date().toISOString(),
       source: {
         kind: "github",
         id: request.headers.get("x-github-delivery") ?? undefined,
       },
-      data: body,
+      data: JSON.parse(new TextDecoder().decode(request.body)),
     }),
   },
 } satisfies HostConfig;
 ```
 
-The mapper receives the parsed JSON body plus the original `Request`, so webhook
-packages can remain structurally compatible with the server without depending on
-a shared ingress-contract package. If the host config is present but
-`ingress.map` is absent, the default event-document behavior is unchanged.
+The mapper uses the shared `HttpIngressMapper` contract from
+`@hooksmith/core/ingress`. It receives normalized method, URL, headers, and the
+raw request-body bytes. Keeping the raw bytes intact allows reusable webhook
+mappers to perform signature verification before parsing the payload, and lets
+the same mapper run under other hosts such as API Gateway Lambda. If the host
+config is present but `ingress.map` is absent, the default event-document
+behavior is unchanged.
 
 A completed Hooksmith execution returns HTTP 200 even when the report has
 `success: false`. HTTP 5xx responses are reserved for request-processing
