@@ -4,7 +4,7 @@ import {
   nullLoggerFactory,
   type Runtime,
 } from "@hooksmith/runtime";
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertExists } from "@std/assert";
 import { createRequestHandler } from "./http.ts";
 
 function createTestRuntime(): Runtime {
@@ -126,13 +126,15 @@ Deno.test("events endpoint preserves raw ingress body bytes", async () => {
     },
   );
 
-  await handler(
+  const response = await handler(
     new Request("http://localhost/events", {
       method: "POST",
       body: payload,
     }),
   );
 
+  assertEquals(response.status, 200);
+  assertExists(capturedBody);
   assertEquals(new TextDecoder().decode(capturedBody), payload);
 });
 
