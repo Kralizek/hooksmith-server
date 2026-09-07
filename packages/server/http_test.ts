@@ -4,7 +4,7 @@ import {
   nullLoggerFactory,
   type Runtime,
 } from "@hooksmith/runtime";
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertExists } from "@std/assert";
 import { createRequestHandler } from "./http.ts";
 
 function createTestRuntime(): Runtime {
@@ -78,18 +78,18 @@ Deno.test("events endpoint processes valid events", async () => {
   assertEquals(report.success, true);
 });
 
-Deno.test("events endpoint maps ingress before event validation", async () => {
+Deno.test("events endpoint maps raw ingress before event validation", async () => {
   const handler = createRequestHandler(
     createTestRuntime(),
     undefined,
-    ({ body, request }) => ({
+    ({ request }) => ({
       type: "webhook.test",
       timestamp: "2026-09-05T00:00:00Z",
       source: {
         kind: "webhook",
         id: request.headers.get("x-delivery-id") ?? undefined,
       },
-      data: body,
+      data: JSON.parse(new TextDecoder().decode(request.body)),
     }),
   );
 
@@ -107,6 +107,35 @@ Deno.test("events endpoint maps ingress before event validation", async () => {
   assertEquals(response.status, 200);
   const report = await response.json();
   assertEquals(report.success, true);
+});
+
+Deno.test("events endpoint preserves raw ingress body bytes", async () => {
+  const payload = '{\n  "message": "hello"\n}';
+  let capturedBody: Uint8Array | undefined;
+  const handler = createRequestHandler(
+    createTestRuntime(),
+    undefined,
+    ({ request }) => {
+      capturedBody = request.body;
+      return {
+        type: "webhook.test",
+        timestamp: "2026-09-05T00:00:00Z",
+        source: { kind: "webhook" },
+        data: {},
+      };
+    },
+  );
+
+  const response = await handler(
+    new Request("http://localhost/events", {
+      method: "POST",
+      body: payload,
+    }),
+  );
+
+  assertEquals(response.status, 200);
+  assertExists(capturedBody);
+  assertEquals(new TextDecoder().decode(capturedBody), payload);
 });
 
 Deno.test("events endpoint rejects invalid mapped event documents", async () => {

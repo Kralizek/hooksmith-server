@@ -1,21 +1,10 @@
-import type { EventDocument } from "@hooksmith/core";
+import type { HttpIngressMapper } from "@hooksmith/core/ingress";
 import { resolveModuleLocation } from "./location.ts";
-
-/** HTTP request data available to an ingress mapper. */
-export interface IngressContext {
-  readonly body: unknown;
-  readonly request: Request;
-}
-
-/** Maps an HTTP request payload to a Hooksmith event document. */
-export type IngressMapper = (
-  context: IngressContext,
-) => EventDocument | Promise<EventDocument>;
 
 /** Optional HTTP ingress configuration for the Hooksmith server host. */
 export interface HostConfig {
   readonly ingress?: {
-    readonly map?: IngressMapper;
+    readonly map?: HttpIngressMapper;
   };
 }
 

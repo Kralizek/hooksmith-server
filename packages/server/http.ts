@@ -1,11 +1,14 @@
 import type { Event, Logger } from "@hooksmith/core";
+import type {
+  HttpIngressMapper,
+  HttpIngressRequest,
+} from "@hooksmith/core/ingress";
 import {
   assertEventDocument,
   hydrateEvent,
   type Runtime,
 } from "@hooksmith/runtime";
 import { trace } from "@opentelemetry/api";
-import type { IngressMapper } from "./host_config.ts";
 import { problemResponse } from "./problem.ts";
 import { annotateHttpRoute } from "./telemetry.ts";
 
@@ -15,14 +18,14 @@ export interface HttpServerOptions {
   readonly port?: number;
   readonly signal?: AbortSignal;
   readonly logger?: Logger;
-  readonly ingressMapper?: IngressMapper;
+  readonly ingressMapper?: HttpIngressMapper;
 }
 
 /** Creates the HTTP request handler used by the Hooksmith server. */
 export function createRequestHandler(
   runtime: Pick<Runtime, "process">,
   logger?: Logger,
-  ingressMapper?: IngressMapper,
+  ingressMapper?: HttpIngressMapper,
 ): (request: Request) => Promise<Response> {
   return async (request) => {
     const path = new URL(request.url).pathname;
@@ -69,22 +72,37 @@ async function processEvent(
   runtime: Pick<Runtime, "process">,
   request: Request,
   logger?: Logger,
-  ingressMapper?: IngressMapper,
+  ingressMapper?: HttpIngressMapper,
 ): Promise<Response> {
-  let document: unknown;
+  let body: Uint8Array;
 
   try {
-    document = await request.json();
+    body = new Uint8Array(await request.arrayBuffer());
   } catch (error) {
     return problemResponse(400, "Bad Request", errorMessage(error));
   }
 
+  let document: unknown;
+
   if (ingressMapper) {
+    const ingressRequest: HttpIngressRequest = {
+      method: request.method,
+      url: request.url,
+      headers: request.headers,
+      body,
+    };
+
     try {
-      document = await ingressMapper({ body: document, request });
+      document = await ingressMapper({ request: ingressRequest });
     } catch (error) {
       logger?.error("Failed to map ingress request.", undefined, error);
       return problemResponse(400, "Bad Request", "Ingress mapping failed.");
+    }
+  } else {
+    try {
+      document = JSON.parse(new TextDecoder().decode(body));
+    } catch (error) {
+      return problemResponse(400, "Bad Request", errorMessage(error));
     }
   }
 
