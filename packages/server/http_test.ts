@@ -110,7 +110,7 @@ Deno.test("events endpoint maps raw ingress before event validation", async () =
 });
 
 Deno.test("events endpoint preserves raw ingress body bytes", async () => {
-  const payload = "{\n  \"message\": \"hello\"\n}";
+  const payload = '{\n  "message": "hello"\n}';
   let capturedBody: Uint8Array | undefined;
   const handler = createRequestHandler(
     createTestRuntime(),
