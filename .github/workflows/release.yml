@@ -228,3 +228,9 @@ jobs:
             HOOKSMITH_VERSION=${{ needs.create-release.outputs.version }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  update-badges:
+    needs: publish-image
+    permissions:
+      contents: write
+    uses: ./.github/workflows/update-badges.yml
