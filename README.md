@@ -1,6 +1,7 @@
 # Hooksmith Server
 
 [![CI](https://github.com/Kralizek/hooksmith-server/actions/workflows/ci.yml/badge.svg)](https://github.com/Kralizek/hooksmith-server/actions/workflows/ci.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/Kralizek/hooksmith-server)](https://github.com/Kralizek/hooksmith-server/releases/latest)
 
 Long-running HTTP server distribution for [Hooksmith](https://github.com/Kralizek/hooksmith).
 
